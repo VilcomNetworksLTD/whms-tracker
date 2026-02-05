@@ -49,10 +49,13 @@
 
           <!-- Password Input -->
           <div>
-            <div class="flex justify-between items-center mb-2">
-              <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-              <a href="#" class="text-sm text-blue-600 hover:text-blue-500 font-medium">Forgot password?</a>
-            </div>
+           <div class="flex justify-between items-center mb-2">
+    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+    
+    <router-link to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+        Forgot password?
+    </router-link>
+</div>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
