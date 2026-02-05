@@ -322,17 +322,7 @@
 </template>
 
 <script>
-import axios from 'axios';
-
-// Create axios instance with base URL
-const api = axios.create({
-    baseURL: 'http://localhost:8000/api',
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-    }
-});
+import api from '../services/api';
 
 export default {
     name: 'Register',
@@ -392,7 +382,8 @@ export default {
             this.error = '';
             
             try {
-                const response = await api.post('/register', this.form);
+                // Use api.register() instead of creating new axios instance
+                const response = await api.register(this.form);
                 
                 if (response.data.success) {
                     this.otpForm.email = this.form.email;
@@ -452,15 +443,15 @@ export default {
             this.error = '';
             
             try {
-                const response = await api.post('/verify-otp', this.otpForm);
+                // Use api.verifyOTP() instead of creating new axios instance
+                const response = await api.verifyOTP(this.otpForm);
                 
                 if (response.data.success) {
-                    // Store token and user data
-                    localStorage.setItem('token', response.data.token);
-                    localStorage.setItem('user', JSON.stringify(response.data.user));
+                    // Use api.setToken() to properly set the token
+                    api.setToken(response.data.token);
                     
-                    // Set default authorization header for future requests
-                    api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+                    // Save user data
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
                     
                     // Show success message
                     this.error = 'Verification successful! Redirecting to dashboard...';
@@ -501,7 +492,8 @@ export default {
             this.error = '';
             
             try {
-                const response = await api.post('/resend-otp', { email: this.form.email });
+                // Use api.resendOTP() instead of creating new axios instance
+                const response = await api.resendOTP({ email: this.form.email });
                 
                 if (response.data.success) {
                     this.startCountdown();
@@ -524,52 +516,30 @@ export default {
         },
 
         startCountdown() {
-            this.countdown = 30;
-            if (this.timer) clearInterval(this.timer);
-            this.timer = setInterval(() => {
-                if (this.countdown > 0) {
-                    this.countdown--;
-                } else {
-                    clearInterval(this.timer);
-                }
-            }, 1000);
-        },
+        // Reset countdown
+        this.countdown = 30;
 
-        focusNext(index, event) {
-            const value = event.target.value;
-            if (value && index < 6 && this.$refs.otpInputs[index]) {
-                this.$refs.otpInputs[index].focus();
-            }
-            
-            // Auto-submit if all digits filled
-            if (index === 6 && this.otpDigits.every(d => d !== '')) {
-                this.handleVerify();
-            }
-        },
-
-        focusPrev(index, event) {
-            if (event.key === 'Backspace' && !event.target.value && index > 1 && this.$refs.otpInputs[index-2]) {
-                this.$refs.otpInputs[index-2].focus();
-            }
-        },
-
-        togglePasswordVisibility(type) {
-            if (type === 'password') {
-                this.showPassword = !this.showPassword;
-            } else {
-                this.showConfirmPassword = !this.showConfirmPassword;
-            }
-        },
-
-        shakeForm() {
-            const form = document.querySelector('form');
-            if (form) {
-                form.classList.add('animate-shake');
-                setTimeout(() => form.classList.remove('animate-shake'), 500);
-            }
+        // Clear existing timer if any
+        if (this.timer) {
+            clearInterval(this.timer);
         }
+
+        // Start new timer
+        this.timer = setInterval(() => {
+            if (this.countdown > 0) {
+                this.countdown--;
+            } else {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+        }, 1000);
+    }
     },
     mounted() {
+        // Clear any existing tokens on register page
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
         // Auto-focus name input on mount
         this.$nextTick(() => {
             const nameInput = document.getElementById('name');

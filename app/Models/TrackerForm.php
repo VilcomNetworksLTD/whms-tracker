@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TrackerForm extends Model
 {
-
-    protected $fillable = [
+     protected $fillable = [
         'client_name',
         'date',
         'payment_method',
