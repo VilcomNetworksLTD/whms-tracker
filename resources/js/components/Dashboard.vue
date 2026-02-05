@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
-    <!-- Header -->
     <div class="mb-8">
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -33,9 +32,7 @@
         </div>
       </div>
 
-      <!-- IMPROVED Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-        <!-- Total Forms Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-blue-50 rounded-lg">
@@ -53,7 +50,6 @@
           </div>
         </div>
 
-        <!-- Total Amount In Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-green-50 rounded-lg">
@@ -71,7 +67,6 @@
           </div>
         </div>
 
-        <!-- Total Fees Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-orange-50 rounded-lg">
@@ -89,7 +84,6 @@
           </div>
         </div>
 
-        <!-- Total Amount Out Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-blue-50 rounded-lg">
@@ -107,7 +101,6 @@
           </div>
         </div>
 
-        <!-- Completed Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-emerald-50 rounded-lg">
@@ -131,7 +124,6 @@
           </div>
         </div>
 
-        <!-- Pending Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-amber-50 rounded-lg">
@@ -157,7 +149,6 @@
       </div>
     </div>
 
-    <!-- Messages -->
     <div v-if="successMessage" class="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl flex items-center animate-fade-in">
       <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -182,7 +173,6 @@
       </button>
     </div>
 
-    <!-- Action Bar -->
     <div class="mb-6 bg-white rounded-xl shadow-lg p-4 border border-gray-200">
       <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
         <div class="flex items-center space-x-4">
@@ -234,7 +224,6 @@
         </button>
       </div>
 
-      <!-- Filters Panel -->
       <div v-if="showFilters" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 animate-slide-down">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
@@ -294,7 +283,6 @@
       </div>
     </div>
 
-    <!-- Loading State -->
     <div v-if="loading" class="flex justify-center items-center py-20">
       <div class="relative">
         <div class="w-16 h-16 border-4 border-blue-200 rounded-full"></div>
@@ -303,7 +291,6 @@
       </div>
     </div>
 
-    <!-- IMPROVED Table Container -->
     <div v-else class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -329,6 +316,20 @@
                   </svg>
                 </div>
               </th>
+
+              <th 
+                class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                @click="sortTable('sales_person')"
+              >
+                <div class="flex items-center">
+                  Sales Person
+                  <svg v-if="sortField === 'sales_person'" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path v-if="sortDirection === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                    <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </th>
+
               <th 
                 class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
                 @click="sortTable('date')"
@@ -401,6 +402,16 @@
                   </div>
                 </div>
               </td>
+
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center mr-3 text-xs font-bold text-gray-600">
+                    {{ formItem.sales_person ? formItem.sales_person.charAt(0).toUpperCase() : '?' }}
+                  </div>
+                  <div class="text-sm font-medium text-gray-900">{{ formItem.sales_person }}</div>
+                </div>
+              </td>
+
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <div class="flex items-center">
                   <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -478,7 +489,7 @@
               </td>
             </tr>
             <tr v-if="filteredForms.length === 0">
-              <td colspan="9" class="px-6 py-12 text-center">
+              <td colspan="10" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center">
                   <div class="w-16 h-16 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4 animate-pulse">
                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -500,7 +511,6 @@
         </table>
       </div>
 
-      <!-- Pagination -->
       <div v-if="totalPages > 1" class="bg-white px-6 py-4 border-t border-gray-200">
         <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
           <div class="text-sm text-gray-700">
@@ -545,7 +555,6 @@
       </div>
     </div>
 
-    <!-- Modal for Add/Edit -->
     <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fade-in">
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
         <div class="p-6">
@@ -573,6 +582,17 @@
                   required
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   placeholder="Enter client name"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sales Person *</label>
+                <input
+                  v-model="form.sales_person"
+                  type="text"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  placeholder="Enter sales person name"
                 />
               </div>
 
@@ -697,7 +717,6 @@
       </div>
     </div>
 
-    <!-- Database Connection Status -->
     <div v-if="showDbStatus" class="fixed bottom-4 right-4 z-40 animate-slide-up">
       <div class="bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-w-sm">
         <div class="flex items-center justify-between mb-2">
@@ -728,14 +747,12 @@
       </div>
     </div>
 
-    <!-- Footer -->
     <div class="mt-8 text-center text-sm text-gray-500">
       <p>© {{ new Date().getFullYear() }} Web Tracker Dashboard. All rights reserved.</p>
     </div>
   </div>
 </template>
 
-<!-- The script section remains the same as your original -->
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import api from '../services/api';
@@ -773,6 +790,7 @@ const dbConnection = ref({
 const form = ref({
   id: null,
   client_name: '',
+  sales_person: '', // ADDED
   date: '',
   payment_method: '',
   description: '',
@@ -797,6 +815,7 @@ const filteredForms = computed(() => {
     const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(form => 
       form.client_name.toLowerCase().includes(query) ||
+      (form.sales_person && form.sales_person.toLowerCase().includes(query)) || // ADDED
       form.description.toLowerCase().includes(query) ||
       form.payment_method.toLowerCase().includes(query)
     );
@@ -832,9 +851,13 @@ const filteredForms = computed(() => {
     let aValue = a[sortField.value];
     let bValue = b[sortField.value];
     
+    // Handle string sorting explicitly to avoid case sensitivity issues
+    if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+    if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
     if (sortField.value.includes('date')) {
-      aValue = new Date(aValue);
-      bValue = new Date(bValue);
+      aValue = new Date(a[sortField.value]);
+      bValue = new Date(b[sortField.value]);
     }
     
     if (sortDirection.value === 'asc') {
@@ -971,6 +994,7 @@ const resetForm = () => {
   form.value = {
     id: null,
     client_name: '',
+    sales_person: '', // ADDED
     date: new Date().toISOString().split('T')[0],
     payment_method: '',
     description: '',

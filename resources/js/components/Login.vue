@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center p-4">
-    <!-- App Header -->
+    
     <div class="text-center mb-10">
       <div class="flex items-center justify-center mb-4">
         <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
@@ -15,18 +15,19 @@
       <p class="text-gray-600 text-lg">Monitor and analyze your web presence</p>
     </div>
 
-    <!-- Login Card -->
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
       <div class="px-8 py-6">
-        <!-- Header -->
+        
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-gray-800">Welcome Back</h2>
-          <p class="text-gray-500 mt-2">Sign in to your Web Tracker account</p>
+          <h2 class="text-2xl font-bold text-gray-800">
+            {{ showOtpStep ? 'Verify Account' : 'Welcome Back' }}
+          </h2>
+          <p class="text-gray-500 mt-2">
+            {{ showOtpStep ? `Enter code sent to ${form.email}` : 'Sign in to your Web Tracker account' }}
+          </p>
         </div>
 
-        <!-- Form -->
-        <form @submit.prevent="handleLogin" class="space-y-5">
-          <!-- Email Input -->
+        <form v-if="!showOtpStep" @submit.prevent="handleLogin" class="space-y-5">
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
             <div class="relative">
@@ -39,7 +40,8 @@
                 v-model="form.email" 
                 id="email"
                 type="email" 
-                placeholder="you@example.com" 
+                autocomplete="email"
+                placeholder="name@vilcom.co.ke" 
                 class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 required
                 :disabled="loading"
@@ -47,15 +49,13 @@
             </div>
           </div>
 
-          <!-- Password Input -->
           <div>
-           <div class="flex justify-between items-center mb-2">
-    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-    
-    <router-link to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
-        Forgot password?
-    </router-link>
-</div>
+            <div class="flex justify-between items-center mb-2">
+              <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+              <router-link to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                  Forgot password?
+              </router-link>
+            </div>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,6 +66,7 @@
                 v-model="form.password" 
                 id="password"
                 type="password" 
+                autocomplete="current-password"
                 placeholder="Enter your password" 
                 class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 required
@@ -74,19 +75,6 @@
             </div>
           </div>
 
-          <!-- Remember Me Checkbox -->
-          <div class="flex items-center">
-            <input 
-              id="remember" 
-              type="checkbox" 
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            >
-            <label for="remember" class="ml-2 block text-sm text-gray-700">
-              Remember me for 30 days
-            </label>
-          </div>
-
-          <!-- Submit Button -->
           <button 
             type="submit" 
             :disabled="loading"
@@ -100,20 +88,58 @@
               <span>{{ loading ? 'Signing In...' : 'Sign In' }}</span>
             </div>
           </button>
+        </form>
 
-          <!-- Error Message -->
-          <div v-if="error" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <div class="flex items-center">
-              <svg class="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p class="text-red-700 text-sm font-medium">{{ error }}</p>
-            </div>
+        <div v-else class="space-y-6 animate-fade-in">
+           <OtpInput 
+              v-model="otpCode"
+              :length="6"
+              label=""
+              help-text="We just sent a fresh code to your email."
+              :error="otpError"
+              :show-error="!!otpError"
+              @complete="handleVerifyOtp"
+           />
+
+           <button 
+             @click="handleVerifyOtp"
+             :disabled="loading || otpCode.length !== 6"
+             class="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+           >
+             <div class="flex items-center justify-center">
+                <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ loading ? 'Verifying...' : 'Verify Code' }}</span>
+             </div>
+           </button>
+
+           <button @click="showOtpStep = false" class="w-full text-sm text-gray-500 hover:text-gray-700">
+              Cancel
+           </button>
+        </div>
+
+        <div v-if="error" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div class="flex items-center">
+            <svg class="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-red-700 text-sm font-medium">{{ error }}</p>
           </div>
-        </form>      
+        </div>
 
-        <!-- Register Link -->
-        <div class="text-center pt-4 border-t border-gray-200">
+      </div>
+
+      <div v-if="!showOtpStep" class="bg-gray-50 px-8 py-4 text-center">
+        <p class="text-xs text-gray-500">
+          By signing in, you agree to our 
+          <a href="#" class="text-blue-600 hover:text-blue-500">Terms</a> and 
+          <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+        </p>
+      </div>
+
+       <div v-if="!showOtpStep" class="text-center pb-6 border-t border-gray-100 pt-4 bg-white">
           <p class="text-gray-600">
             Don't have an account?
             <router-link to="/register" class="font-semibold text-blue-600 hover:text-blue-500 ml-1">
@@ -121,119 +147,108 @@
             </router-link>
           </p>
         </div>
-      </div>
-      
-      <!-- Footer -->
-      <div class="bg-gray-50 px-8 py-4 text-center">
-        <p class="text-xs text-gray-500">
-          By signing in, you agree to our 
-          <a href="#" class="text-blue-600 hover:text-blue-500">Terms</a> and 
-          <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
-        </p>
-      </div>
-    </div>
 
-    <!-- Demo Credentials (for development only) -->
-    <div v-if="isDevelopment" class="mt-8 p-4 bg-blue-50 rounded-lg max-w-md">
-      <p class="text-sm text-blue-800 font-medium mb-2">Demo Credentials:</p>
-      <div class="text-xs text-blue-700 space-y-1">
-        <p>Email: demo@webtracker.app</p>
-        <p>Password: demo123</p>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
-import api from '../services/api';
+import axios from 'axios';
+import OtpInput from './OtpInput.vue'; // Make sure this path is correct!
 
 export default {
+  name: 'Login',
+  components: {
+    OtpInput
+  },
   data() {
     return {
       form: { email: '', password: '' },
       loading: false,
       error: '',
-      isDevelopment: process.env.NODE_ENV === 'development'
+      
+      // OTP State
+      showOtpStep: false,
+      otpCode: '',
+      otpError: ''
     };
   },
   methods: {
     async handleLogin() {
       this.loading = true;
       this.error = '';
+      this.otpError = '';
+
       try {
-        const response = await api.login(this.form); // Use api.login() instead of axios.post()
-        
-        // Save Token - api.setToken() already handles localStorage and headers
-        api.setToken(response.data.token);
-        
-        // Save user info
-        if (response.data.user) {
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-        }
-        
-        // Show success message
-        this.$emit('login-success', response.data.user);
-        
-        // Small delay for better UX
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Redirect
-        this.$router.push('/dashboard');
+        const response = await axios.post('/api/login', this.form);
+        // Successful login
+        localStorage.setItem('token', response.data.token);
+        window.location.href = '/dashboard'; 
       } catch (err) {
-        this.error = err.response?.data?.message || 'Login failed. Please check your credentials.';
-        // Shake animation on error
-        const form = document.querySelector('form');
-        form.classList.add('animate-shake');
-        setTimeout(() => form.classList.remove('animate-shake'), 500);
+        let msg = err.response?.data?.message || 'Login failed';
+        
+        // Handle Laravel validation array
+        if (err.response?.data?.errors?.email) {
+          msg = err.response.data.errors.email[0];
+        }
+
+        // CRITICAL: Check for the specific "unverified" message
+        if (msg.includes('fresh verification code')) {
+            // Switch to OTP view
+            this.showOtpStep = true;
+            this.error = ''; // Clear main error
+        } else {
+            this.error = msg;
+        }
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async handleVerifyOtp() {
+      // Don't submit if code is incomplete
+      if (this.otpCode.length !== 6) return;
+
+      this.loading = true;
+      this.otpError = '';
+      
+      try {
+        const response = await axios.post('/api/verify-otp', {
+            email: this.form.email,
+            otp: this.otpCode
+        });
+
+        // OTP Valid? Get the token and login
+        localStorage.setItem('token', response.data.token);
+        window.location.href = '/dashboard';
+
+      } catch (err) {
+         this.otpError = err.response?.data?.message || 'Invalid code. Please try again.';
+         // Also show in global error for visibility
+         this.error = this.otpError;
       } finally {
         this.loading = false;
       }
     }
   },
   mounted() {
-    // Focus on email input when component mounts
     document.getElementById('email')?.focus();
-    
-    // Clear any existing tokens on login page
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
-    // Add custom animation for shake effect
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-        20%, 40%, 60%, 80% { transform: translateX(5px); }
-      }
-      .animate-shake {
-        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-      }
-    `;
-    document.head.appendChild(style);
   }
 };
 </script>
 
 <style scoped>
-/* Custom gradient text animation */
-@keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Simple fade in animation for the OTP flip */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient 3s ease infinite;
-}
-
-/* Smooth transitions */
-input, button {
-  transition: all 0.2s ease-in-out;
-}
-
-/* Focus styles */
 input:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
