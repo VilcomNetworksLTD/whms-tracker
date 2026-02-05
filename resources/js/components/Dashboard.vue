@@ -33,88 +33,124 @@
         </div>
       </div>
 
-      <!-- Stats Cards -->
+      <!-- IMPROVED Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-        <div class="bg-gradient-to-br from-white to-blue-50 p-5 rounded-xl shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center">
-            <div class="p-2 bg-blue-100 rounded-lg mr-4">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Total Forms Card -->
+        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div class="flex items-start justify-between mb-3">
+            <div class="p-2 bg-blue-50 rounded-lg">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Total Forms</p>
-              <p class="text-2xl font-bold text-gray-800">{{ trackerForms.length }}</p>
+            <div class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+              Forms
             </div>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ trackerForms.length }}</p>
+            <p class="text-sm text-gray-500 truncate">Total Forms</p>
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-white to-green-50 p-5 rounded-xl shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center">
-            <div class="p-2 bg-green-100 rounded-lg mr-4">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Total Amount In Card -->
+        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div class="flex items-start justify-between mb-3">
+            <div class="p-2 bg-green-50 rounded-lg">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Total Amount In</p>
-              <p class="text-2xl font-bold text-green-600">{{ formatCurrency(stats.totalAmountIn) }}</p>
+            <div class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+              +{{ stats.totalAmountIn > 0 ? formatCurrency(stats.totalAmountIn / trackerForms.length) : '0' }}
             </div>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(stats.totalAmountIn) }}</p>
+            <p class="text-sm text-gray-500 truncate">Total Amount In</p>
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-white to-orange-50 p-5 rounded-xl shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center">
-            <div class="p-2 bg-orange-100 rounded-lg mr-4">
-              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Total Fees Card -->
+        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div class="flex items-start justify-between mb-3">
+            <div class="p-2 bg-orange-50 rounded-lg">
+              <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
               </svg>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Total Fees</p>
-              <p class="text-2xl font-bold text-orange-600">{{ formatCurrency(stats.totalFees) }}</p>
+            <div class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+              {{ stats.totalAmountIn > 0 ? ((stats.totalFees / stats.totalAmountIn) * 100).toFixed(1) + '%' : '0%' }}
             </div>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(stats.totalFees) }}</p>
+            <p class="text-sm text-gray-500 truncate">Total Fees</p>
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-white to-blue-50 p-5 rounded-xl shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center">
-            <div class="p-2 bg-blue-100 rounded-lg mr-4">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Total Amount Out Card -->
+        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div class="flex items-start justify-between mb-3">
+            <div class="p-2 bg-blue-50 rounded-lg">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Total Amount Out</p>
-              <p class="text-2xl font-bold text-blue-600">{{ formatCurrency(stats.totalAmountOut) }}</p>
+            <div class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+              Net
             </div>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(stats.totalAmountOut) }}</p>
+            <p class="text-sm text-gray-500 truncate">Total Amount Out</p>
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-white to-emerald-50 p-5 rounded-xl shadow-lg border border-emerald-100 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center">
-            <div class="p-2 bg-emerald-100 rounded-lg mr-4">
-              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Completed Card -->
+        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div class="flex items-start justify-between mb-3">
+            <div class="p-2 bg-emerald-50 rounded-lg">
+              <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Completed</p>
-              <p class="text-2xl font-bold text-emerald-600">{{ stats.completed }}</p>
+            <div class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+              {{ trackerForms.length > 0 ? Math.round((stats.completed / trackerForms.length) * 100) : 0 }}%
+            </div>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ stats.completed }}</p>
+            <p class="text-sm text-gray-500 truncate">Completed Forms</p>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+              <div 
+                class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" 
+                :style="{ width: trackerForms.length > 0 ? (stats.completed / trackerForms.length) * 100 + '%' : '0%' }"
+              ></div>
             </div>
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-white to-amber-50 p-5 rounded-xl shadow-lg border border-amber-100 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center">
-            <div class="p-2 bg-amber-100 rounded-lg mr-4">
-              <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Pending Card -->
+        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div class="flex items-start justify-between mb-3">
+            <div class="p-2 bg-amber-50 rounded-lg">
+              <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Pending</p>
-              <p class="text-2xl font-bold text-amber-600">{{ stats.pending }}</p>
+            <div class="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
+              {{ trackerForms.length > 0 ? Math.round((stats.pending / trackerForms.length) * 100) : 0 }}%
+            </div>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ stats.pending }}</p>
+            <p class="text-sm text-gray-500 truncate">Pending Forms</p>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+              <div 
+                class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" 
+                :style="{ width: trackerForms.length > 0 ? (stats.pending / trackerForms.length) * 100 + '%' : '0%' }"
+              ></div>
             </div>
           </div>
         </div>
@@ -267,7 +303,7 @@
       </div>
     </div>
 
-    <!-- Table -->
+    <!-- IMPROVED Table Container -->
     <div v-else class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -699,6 +735,7 @@
   </div>
 </template>
 
+<!-- The script section remains the same as your original -->
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import api from '../services/api';
@@ -1315,5 +1352,26 @@ tr {
 
 .hover-scale:hover {
   transform: scale(1.05);
+}
+
+/* Improved stats cards */
+.stats-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-to));
+}
+
+/* Progress bar animation */
+.progress-bar {
+  transition: width 1s ease-in-out;
 }
 </style>

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\AuthService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
@@ -17,7 +17,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-           Log::info('Register payload:', $request->all());
+        Log::info('Register payload:', $request->all());
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
@@ -30,21 +30,22 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Registration successful. OTP sent to email.',
-                'email' => $validated['email']
+                'email' => $validated['email'],
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
-            
+
         } catch (\Exception $e) {
-            Log::error('Registration error: ' . $e->getMessage());
+            Log::error('Registration error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -68,22 +69,23 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'email_verified_at' => $user->email_verified_at
-                ]
+                    'email_verified_at' => $user->email_verified_at,
+                ],
             ], 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
-            
+
         } catch (\Exception $e) {
-            Log::error('OTP verification error: ' . $e->getMessage());
+            Log::error('OTP verification error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -92,18 +94,18 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
-                'email' => 'required|email|exists:users,email'
+                'email' => 'required|email|exists:users,email',
             ]);
 
             // Generate new OTP
             $code = rand(100000, 999999);
-            
+
             // Update or create OTP record
             $otp = \App\Models\Otp::updateOrCreate(
                 ['email' => $validated['email']],
                 [
                     'code' => $code,
-                    'expires_at' => \Carbon\Carbon::now()->addMinutes(10)
+                    'expires_at' => \Carbon\Carbon::now()->addMinutes(10),
                 ]
             );
 
@@ -117,10 +119,11 @@ class AuthController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Resend OTP error: ' . $e->getMessage());
+            Log::error('Resend OTP error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to resend OTP. Please try again.'
+                'message' => 'Failed to resend OTP. Please try again.',
             ], 500);
         }
     }
@@ -143,23 +146,49 @@ class AuthController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'email' => $user->email
-                ]
+                    'email' => $user->email,
+                ],
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
-            
+
         } catch (\Exception $e) {
-            Log::error('Login error: ' . $e->getMessage());
+            Log::error('Login error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 401);
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if ($user) {
+                // Revoke all tokens for the user
+                $user->tokens()->delete();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Logged out successfully.',
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Logout error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to logout. Please try again.',
+            ], 500);
         }
     }
 }
