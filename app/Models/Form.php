@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TrackerForm extends Model
+class Form extends Model
 {
+    use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'title',
         'client_name',
         'date',
         'payment_method',
@@ -19,11 +23,8 @@ class TrackerForm extends Model
         'feedback_date'
     ];
 
-    protected $casts = [
-        'date' => 'date:Y-m-d',         
-        'feedback_date' => 'date:Y-m-d', 
-        'amount_in' => 'decimal:2',      
-        'fees' => 'decimal:2',          
-        'amount_out' => 'decimal:2',     
-    ];
+    public function user()
+    {
+        return $this->belongsTo(Domain::class);
+    }
 }
