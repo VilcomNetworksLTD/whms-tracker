@@ -145,7 +145,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../services/api';
 
 export default {
   data() {
@@ -161,13 +161,16 @@ export default {
       this.loading = true;
       this.error = '';
       try {
-        const response = await axios.post('/api/login', this.form);
-        // Save Token
-        localStorage.setItem('token', response.data.token);
-        // Save user info if provided
+        const response = await api.login(this.form); // Use api.login() instead of axios.post()
+        
+        // Save Token - api.setToken() already handles localStorage and headers
+        api.setToken(response.data.token);
+        
+        // Save user info
         if (response.data.user) {
           localStorage.setItem('user', JSON.stringify(response.data.user));
         }
+        
         // Show success message
         this.$emit('login-success', response.data.user);
         
@@ -190,6 +193,10 @@ export default {
   mounted() {
     // Focus on email input when component mounts
     document.getElementById('email')?.focus();
+    
+    // Clear any existing tokens on login page
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     
     // Add custom animation for shake effect
     const style = document.createElement('style');

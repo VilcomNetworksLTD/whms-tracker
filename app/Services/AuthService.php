@@ -9,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OtpMail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class AuthService
 {
@@ -94,13 +95,13 @@ class AuthService
     public function login(array $credentials)
     {
         // 1. Check Password
-        if (!auth()->attempt($credentials)) {
+        if (!Auth::attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid credentials provided.']
             ]);
         }
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         // 2. Security Check: Is email verified?
         if (is_null($user->email_verified_at)) {
