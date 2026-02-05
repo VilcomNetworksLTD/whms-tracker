@@ -49,10 +49,13 @@
 
           <!-- Password Input -->
           <div>
-            <div class="flex justify-between items-center mb-2">
-              <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-              <a href="#" class="text-sm text-blue-600 hover:text-blue-500 font-medium">Forgot password?</a>
-            </div>
+           <div class="flex justify-between items-center mb-2">
+    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+    
+    <router-link to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+        Forgot password?
+    </router-link>
+</div>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -142,7 +145,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../services/api';
 
 export default {
   data() {
@@ -158,13 +161,16 @@ export default {
       this.loading = true;
       this.error = '';
       try {
-        const response = await axios.post('/api/login', this.form);
-        // Save Token
-        localStorage.setItem('token', response.data.token);
-        // Save user info if provided
+        const response = await api.login(this.form); // Use api.login() instead of axios.post()
+        
+        // Save Token - api.setToken() already handles localStorage and headers
+        api.setToken(response.data.token);
+        
+        // Save user info
         if (response.data.user) {
           localStorage.setItem('user', JSON.stringify(response.data.user));
         }
+        
         // Show success message
         this.$emit('login-success', response.data.user);
         
@@ -187,6 +193,10 @@ export default {
   mounted() {
     // Focus on email input when component mounts
     document.getElementById('email')?.focus();
+    
+    // Clear any existing tokens on login page
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     
     // Add custom animation for shake effect
     const style = document.createElement('style');
