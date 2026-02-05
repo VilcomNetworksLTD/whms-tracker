@@ -189,9 +189,8 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Password changed successfully.']);
     }
-}
 
-    public function logout(Request $request)
+     public function logout(Request $request)
     {
         try {
             $user = $request->user();
@@ -216,3 +215,6 @@ class AuthController extends Controller
         }
     }
 }
+
+   
+
