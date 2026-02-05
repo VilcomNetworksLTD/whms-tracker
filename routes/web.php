@@ -11,3 +11,7 @@ Route::get('/', function () {
 Route::get('/{any}', function () {
     return view('welcome');
 })->where('any', '.*');
+
+Route::get('/test-forms', function () {
+    return view('test-forms');
+});
