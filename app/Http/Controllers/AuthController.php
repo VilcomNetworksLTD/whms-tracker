@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\AuthService; 
+use App\Services\AuthService;
+use Illuminate\Support\Facades\Log;
+
 class AuthController extends Controller
 {
     protected $authService;
@@ -15,47 +17,149 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+           Log::info('Register payload:', $request->all());
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
-        $this->authService->register($validated);
+            $user = $this->authService->register($validated);
 
-        return response()->json([
-            'message' => 'Registration successful. OTP sent to email.',
-            'email' => $validated['email']
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful. OTP sent to email.',
+                'email' => $validated['email']
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            Log::error('Registration error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function verifyOtp(Request $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'otp' => 'required|string|size:6',
-        ]);
+        try {
+            $validated = $request->validate([
+                'email' => 'required|email',
+                'otp' => 'required|string|size:6',
+            ]);
 
-        $token = $this->authService->verifyOtp($validated);
+            $token = $this->authService->verifyOtp($validated);
+            $user = \App\Models\User::where('email', $validated['email'])->first();
 
-        return response()->json([
-            'message' => 'Email verified successfully.',
-            'token' => $token
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Email verified successfully.',
+                'token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'email_verified_at' => $user->email_verified_at
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            Log::error('OTP verification error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function resendOtp(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'email' => 'required|email|exists:users,email'
+            ]);
+
+            // Generate new OTP
+            $code = rand(100000, 999999);
+            
+            // Update or create OTP record
+            $otp = \App\Models\Otp::updateOrCreate(
+                ['email' => $validated['email']],
+                [
+                    'code' => $code,
+                    'expires_at' => \Carbon\Carbon::now()->addMinutes(10)
+                ]
+            );
+
+            // Send email
+            \Illuminate\Support\Facades\Mail::to($validated['email'])
+                ->send(new \App\Mail\OtpMail($code));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP has been resent to your email.',
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Resend OTP error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to resend OTP. Please try again.'
+            ], 500);
+        }
     }
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
 
-        $token = $this->authService->login($credentials);
+            $token = $this->authService->login($credentials);
+            $user = \App\Models\User::where('email', $credentials['email'])->first();
 
-        return response()->json([
-            'message' => 'Login successful',
-            'token' => $token
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Login successful',
+                'token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email
+                ]
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 401);
+        }
     }
 }
