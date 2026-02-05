@@ -58,4 +58,17 @@ class AuthController extends Controller
             'token' => $token
         ]);
     }
+
+    public function resendOtp(Request $request)
+{
+    $validated = $request->validate([
+        'email' => 'required|email'
+    ]);
+
+    $this->authService->resendOtp($validated);
+
+    return response()->json([
+        'message' => 'New code sent successfully.'
+    ], 200);
+}
 }

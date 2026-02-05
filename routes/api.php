@@ -9,5 +9,5 @@ use App\Http\Controllers\TrackerFormController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/login', [AuthController::class, 'login']);
-
+Route::post('/resend-otp', [App\Http\Controllers\AuthController::class, 'resendOtp']);
 

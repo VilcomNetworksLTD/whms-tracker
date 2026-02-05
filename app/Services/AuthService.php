@@ -118,4 +118,41 @@ class AuthService
         // 3. Issue Token
         return $user->createToken('auth_token')->plainTextToken;
     }
+
+    public function resendOtp(array $data)
+{
+    // 1. Check if user exists
+    $user = User::where('email', $data['email'])->first();
+
+    if (!$user) {
+        throw ValidationException::withMessages(['email' => ['User not found.']]);
+    }
+
+    if ($user->email_verified_at) {
+        throw ValidationException::withMessages(['email' => ['Email is already verified. Please login.']]);
+    }
+
+    // 2. Generate NEW code
+    $code = rand(100000, 999999);
+    
+    // 3. Update the existing OTP record (or create new)
+    Otp::updateOrCreate(
+        ['email' => $data['email']],
+        [
+            'code' => $code,
+            'expires_at' => \Carbon\Carbon::now()->addMinutes(10)
+        ]
+    );
+
+    // 4. Send Email
+    try {
+        Mail::to($data['email'])->send(new OtpMail($code));
+    } catch (\Exception $e) {
+        throw ValidationException::withMessages([
+            'email' => ['Failed to resend email. Check SMTP.']
+        ]);
+    }
+
+    return true;
+}
 }
