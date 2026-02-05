@@ -18,3 +18,7 @@ Route::get('/dashboard', [FormController::class, 'index'])->name('dashboard');
 Route::get('/{any}', function () {
     return view('welcome');
 })->where('any', '.*');
+
+Route::get('/test-forms', function () {
+    return view('test-forms');
+});

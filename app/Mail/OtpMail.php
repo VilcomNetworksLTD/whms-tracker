@@ -12,14 +12,14 @@ class OtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $otpCode; // 1. Define the property
+    public $otp;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($code) // 2. Accept the code here
+    public function __construct($otp)
     {
-        $this->otpCode = $code;
+        $this->otp = $otp;
     }
 
     /**
@@ -28,7 +28,7 @@ class OtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Verification Code',
+            subject: 'Your Verification Code - Web Tracker',
         );
     }
 
@@ -38,8 +38,8 @@ class OtpMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.otp', // 3. Ensure this matches your blade file name
-            with: ['otpCode' => $this->otpCode] // 4. Pass data to view
+            view: 'emails.otp',
+            with: ['otp' => $this->otp]
         );
     }
 

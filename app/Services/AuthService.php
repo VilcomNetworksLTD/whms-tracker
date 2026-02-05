@@ -17,14 +17,8 @@ class AuthService
      */
     public function register(array $data)
     {
-        // 1. Domain Restriction Check
-        if (!str_ends_with($data['email'], '@vilcom.co.ke')) {
-            throw ValidationException::withMessages([
-                'email' => ['Registration is restricted to .vilcom.co.ke accounts only.']
-            ]);
-        }
 
-        // 2. Create the User (Unverified by default)
+        // 1. Create the User (Unverified by default)
         // We use updateOrCreate in case they try to register again after failing verification
         $user = User::firstOrCreate(
             ['email' => $data['email']],

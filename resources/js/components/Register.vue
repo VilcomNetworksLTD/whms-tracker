@@ -324,205 +324,263 @@
 <script>
 import axios from 'axios';
 
+// Create axios instance with base URL
+const api = axios.create({
+    baseURL: 'http://localhost:8000/api',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+});
+
 export default {
-  name: 'Register',
-  data() {
-    return {
-      step: 1,
-      loading: false,
-      resending: false,
-      error: '',
-      termsAccepted: false,
-      showPassword: false,
-      showConfirmPassword: false,
-      countdown: 30,
-      timer: null,
-      
-      form: {
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: ''
-      },
-      
-      otpForm: {
-        email: '',
-        otp: ''
-      },
-      
-      otpDigits: ['', '', '', '', '', '']
-    };
-  },
-  watch: {
-    otpDigits: {
-      deep: true,
-      handler(newDigits) {
-        this.otpForm.otp = newDigits.join('');
-      }
+    name: 'Register',
+    data() {
+        return {
+            step: 1,
+            loading: false,
+            resending: false,
+            error: '',
+            termsAccepted: false,
+            showPassword: false,
+            showConfirmPassword: false,
+            countdown: 30,
+            timer: null,
+            
+            form: {
+                name: '',
+                email: '',
+                password: '',
+                password_confirmation: ''
+            },
+            
+            otpForm: {
+                email: '',
+                otp: ''
+            },
+            
+            otpDigits: ['', '', '', '', '', '']
+        };
     },
-    countdown(newValue) {
-      if (newValue === 0 && this.timer) {
-        clearInterval(this.timer);
-      }
-    }
-  },
-  methods: {
-    async handleRegister() {
-      if (!this.termsAccepted) {
-        this.error = 'Please accept the Terms of Service and Privacy Policy';
-        return;
-      }
-      
-      if (this.form.password !== this.form.password_confirmation) {
-        this.error = 'Passwords do not match';
-        return;
-      }
-      
-      this.loading = true;
-      this.error = '';
-      
-      try {
-        await axios.post('/api/register', this.form);
-        this.otpForm.email = this.form.email;
-        
-        // Start countdown timer
-        this.startCountdown();
-        
-        // Auto-focus first OTP input when moving to step 2
-        this.$nextTick(() => {
-          this.step = 2;
-          setTimeout(() => {
-            if (this.$refs.otpInputs && this.$refs.otpInputs[0]) {
-              this.$refs.otpInputs[0].focus();
+    watch: {
+        otpDigits: {
+            deep: true,
+            handler(newDigits) {
+                this.otpForm.otp = newDigits.join('');
             }
-          }, 100);
+        },
+        countdown(newValue) {
+            if (newValue === 0 && this.timer) {
+                clearInterval(this.timer);
+            }
+        }
+    },
+    methods: {
+        async handleRegister() {
+            if (!this.termsAccepted) {
+                this.error = 'Please accept the Terms of Service and Privacy Policy';
+                return;
+            }
+            
+            if (this.form.password !== this.form.password_confirmation) {
+                this.error = 'Passwords do not match';
+                return;
+            }
+            
+            this.loading = true;
+            this.error = '';
+            
+            try {
+                const response = await api.post('/register', this.form);
+                
+                if (response.data.success) {
+                    this.otpForm.email = this.form.email;
+                    
+                    // Start countdown timer
+                    this.startCountdown();
+                    
+                    // Auto-focus first OTP input when moving to step 2
+                    this.$nextTick(() => {
+                        this.step = 2;
+                        setTimeout(() => {
+                            if (this.$refs.otpInputs && this.$refs.otpInputs[0]) {
+                                this.$refs.otpInputs[0].focus();
+                            }
+                        }, 100);
+                    });
+                    
+                    // Show success message
+                    this.error = 'Registration successful! Check your email for the OTP code.';
+                    setTimeout(() => this.error = '', 3000);
+                    
+                } else {
+                    if (response.data.errors) {
+                        const firstError = Object.values(response.data.errors)[0][0];
+                        this.error = firstError;
+                    } else {
+                        this.error = response.data.message || 'Registration failed';
+                    }
+                }
+                
+            } catch (err) {
+                if (err.response && err.response.data) {
+                    if (err.response.data.errors) {
+                        const firstError = Object.values(err.response.data.errors)[0][0];
+                        this.error = firstError;
+                    } else {
+                        this.error = err.response.data.message || 'Registration failed';
+                    }
+                } else if (err.request) {
+                    this.error = 'Network error. Please check your connection.';
+                } else {
+                    this.error = 'An unexpected error occurred';
+                }
+                console.error('Registration error:', err);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async handleVerify() {
+            if (this.otpForm.otp.length !== 6) {
+                this.error = 'Please enter the complete 6-digit code';
+                return;
+            }
+            
+            this.loading = true;
+            this.error = '';
+            
+            try {
+                const response = await api.post('/verify-otp', this.otpForm);
+                
+                if (response.data.success) {
+                    // Store token and user data
+                    localStorage.setItem('token', response.data.token);
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
+                    
+                    // Set default authorization header for future requests
+                    api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+                    
+                    // Show success message
+                    this.error = 'Verification successful! Redirecting to dashboard...';
+                    
+                    // Show success animation
+                    this.$emit('registration-success', response.data.user);
+                    
+                    // Redirect to dashboard after short delay
+                    setTimeout(() => {
+                        this.$router.push('/dashboard');
+                    }, 1000);
+                    
+                } else {
+                    this.error = response.data.message || 'Verification failed';
+                    this.shakeForm();
+                }
+                
+            } catch (err) {
+                if (err.response && err.response.data) {
+                    if (err.response.data.errors) {
+                        const firstError = Object.values(err.response.data.errors)[0][0];
+                        this.error = firstError;
+                    } else {
+                        this.error = err.response.data.message || 'Invalid verification code';
+                    }
+                } else {
+                    this.error = 'Network error. Please try again.';
+                }
+                console.error('Verification error:', err);
+                this.shakeForm();
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async resendOTP() {
+            this.resending = true;
+            this.error = '';
+            
+            try {
+                const response = await api.post('/resend-otp', { email: this.form.email });
+                
+                if (response.data.success) {
+                    this.startCountdown();
+                    this.error = 'Verification code has been resent to your email';
+                    setTimeout(() => this.error = '', 3000);
+                } else {
+                    this.error = response.data.message || 'Failed to resend code';
+                }
+                
+            } catch (err) {
+                if (err.response && err.response.data) {
+                    this.error = err.response.data.message || 'Failed to resend code. Please try again.';
+                } else {
+                    this.error = 'Network error. Please try again.';
+                }
+                console.error('Resend OTP error:', err);
+            } finally {
+                this.resending = false;
+            }
+        },
+
+        startCountdown() {
+            this.countdown = 30;
+            if (this.timer) clearInterval(this.timer);
+            this.timer = setInterval(() => {
+                if (this.countdown > 0) {
+                    this.countdown--;
+                } else {
+                    clearInterval(this.timer);
+                }
+            }, 1000);
+        },
+
+        focusNext(index, event) {
+            const value = event.target.value;
+            if (value && index < 6 && this.$refs.otpInputs[index]) {
+                this.$refs.otpInputs[index].focus();
+            }
+            
+            // Auto-submit if all digits filled
+            if (index === 6 && this.otpDigits.every(d => d !== '')) {
+                this.handleVerify();
+            }
+        },
+
+        focusPrev(index, event) {
+            if (event.key === 'Backspace' && !event.target.value && index > 1 && this.$refs.otpInputs[index-2]) {
+                this.$refs.otpInputs[index-2].focus();
+            }
+        },
+
+        togglePasswordVisibility(type) {
+            if (type === 'password') {
+                this.showPassword = !this.showPassword;
+            } else {
+                this.showConfirmPassword = !this.showConfirmPassword;
+            }
+        },
+
+        shakeForm() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.classList.add('animate-shake');
+                setTimeout(() => form.classList.remove('animate-shake'), 500);
+            }
+        }
+    },
+    mounted() {
+        // Auto-focus name input on mount
+        this.$nextTick(() => {
+            const nameInput = document.getElementById('name');
+            if (nameInput) nameInput.focus();
         });
-        
-      } catch (err) {
-        this.error = err.response?.data?.message || 'Registration failed. Please check your information.';
-      } finally {
-        this.loading = false;
-      }
     },
-
-    async handleVerify() {
-      if (this.otpForm.otp.length !== 6) {
-        this.error = 'Please enter the complete 6-digit code';
-        return;
-      }
-      
-      this.loading = true;
-      this.error = '';
-      
-      try {
-        const response = await axios.post('/api/verify-otp', this.otpForm);
-        localStorage.setItem('token', response.data.token);
-        
-        if (response.data.user) {
-          localStorage.setItem('user', JSON.stringify(response.data.user));
+    beforeUnmount() {
+        if (this.timer) {
+            clearInterval(this.timer);
         }
-        
-        // Show success animation
-        this.$emit('registration-success', response.data.user);
-        
-        // Small delay for better UX
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        this.$router.push('/dashboard');
-      } catch (err) {
-        this.error = err.response?.data?.message || 'Invalid verification code. Please try again.';
-        // Shake animation on error
-        const form = document.querySelector('form');
-        form.classList.add('animate-shake');
-        setTimeout(() => form.classList.remove('animate-shake'), 500);
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async resendOTP() {
-      this.resending = true;
-      this.error = '';
-      
-      try {
-        await axios.post('/api/resend-otp', { email: this.form.email });
-        this.startCountdown();
-        this.error = 'Verification code has been resent to your email';
-        setTimeout(() => this.error = '', 3000);
-      } catch (err) {
-        this.error = err.response?.data?.message || 'Failed to resend code. Please try again.';
-      } finally {
-        this.resending = false;
-      }
-    },
-
-    startCountdown() {
-      this.countdown = 30;
-      if (this.timer) clearInterval(this.timer);
-      this.timer = setInterval(() => {
-        if (this.countdown > 0) {
-          this.countdown--;
-        } else {
-          clearInterval(this.timer);
-        }
-      }, 1000);
-    },
-
-    focusNext(index, event) {
-      const value = event.target.value;
-      if (value && index < 6 && this.$refs.otpInputs[index]) {
-        this.$refs.otpInputs[index].focus();
-      }
-      
-      // Auto-submit if all digits filled
-      if (index === 6 && this.otpDigits.every(d => d !== '')) {
-        this.handleVerify();
-      }
-    },
-
-    focusPrev(index, event) {
-      if (event.key === 'Backspace' && !event.target.value && index > 1 && this.$refs.otpInputs[index-2]) {
-        this.$refs.otpInputs[index-2].focus();
-      }
-    },
-
-    togglePasswordVisibility(type) {
-      if (type === 'password') {
-        this.showPassword = !this.showPassword;
-      } else {
-        this.showConfirmPassword = !this.showConfirmPassword;
-      }
     }
-  },
-  mounted() {
-    // Auto-focus name input on mount
-    document.getElementById('name')?.focus();
-    
-    // Add custom animation for shake effect
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-        20%, 40%, 60%, 80% { transform: translateX(5px); }
-      }
-      .animate-shake {
-        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-      }
-      
-      /* OTP input focus styling */
-      input:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      }
-    `;
-    document.head.appendChild(style);
-  },
-  beforeUnmount() {
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
-  }
 };
 </script>
 
