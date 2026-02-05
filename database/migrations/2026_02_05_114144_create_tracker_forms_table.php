@@ -17,8 +17,8 @@ return new class extends Migration
         $table->date('date');
         $table->string('payment_method');
         $table->text('description')->nullable();
-        $table->decimal('amount_in', 10, 2);
-        $table->decimal('fees', 10, 2)->default(0);
+        $table->decimal('amount_in', 10, 2)->nullable();
+        $table->decimal('fees', 10, 2)->nullable()->default(0);
         $table->decimal('amount_out', 10, 2);
         $table->text('feedback')->nullable();
         $table->date('feedback_date')->nullable();
