@@ -15,7 +15,8 @@ class TrackerForm extends Model
         'fees',
         'amount_out',
         'feedback',
-        'feedback_date'
+        'feedback_date',
+        'sales_person'
     ];
 
     protected $casts = [

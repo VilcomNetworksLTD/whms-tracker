@@ -24,6 +24,15 @@ apiClient.interceptors.request.use(
     }
 );
 
+
+apiClient.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Add response interceptor for error handling
 apiClient.interceptors.response.use(
     (response) => response,
@@ -99,7 +108,12 @@ const api = {
             params,
             responseType: 'blob'
         });
-    }
+    },
+    
+    getStats() {
+       
+        return apiClient.get('/tracker-forms/stats'); 
+    },
 };
 
 // Export the API object

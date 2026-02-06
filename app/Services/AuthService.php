@@ -76,7 +76,6 @@ class AuthService
 
         // 4. Verify the User
         $user = User::where('email', $data['email'])->firstOrFail();
-        
         // Mark email as verified
         $user->forceFill([
             'email_verified_at' => now(),
@@ -85,7 +84,16 @@ class AuthService
         // 5. Clean up (Delete the used OTP)
         $otpRecord->delete();
 
-        // 6. Issue Token
+        // 6. Ensure user is authenticated before issuing token
+        if (!Auth::check() || Auth::id() !== $user->id) {
+            Auth::login($user);
+        }
+        // Issue Token
+        if (!method_exists($user, 'createToken')) {
+            throw ValidationException::withMessages([
+                'token' => ['User model does not support API tokens. Please ensure HasApiTokens trait is used.']
+            ]);
+        }
         return $user->createToken('auth_token')->plainTextToken;
     }
 
@@ -94,7 +102,7 @@ class AuthService
      */
     public function login(array $credentials)
     {
-        // 1. Check Password
+        // 1. Verify Credentials
         if (!Auth::attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid credentials provided.']
@@ -103,16 +111,49 @@ class AuthService
 
         $user = Auth::user();
 
-        // 2. Security Check: Is email verified?
+        // 2. CHECK IF UNVERIFIED
         if (is_null($user->email_verified_at)) {
-             throw ValidationException::withMessages([
-                'email' => ['Please verify your email address first via the OTP sent to you.']
+            
+            // A. Generate a new fresh code
+            $code = rand(100000, 999999);
+            
+            // B. Save it to the database
+            Otp::updateOrCreate(
+                ['email' => $user->email],
+                [
+                    'code' => $code,
+                    'expires_at' => Carbon::now()->addMinutes(10)
+                ]
+            );
+
+            // C. Send the Email immediately
+            try {
+                Mail::to($user->email)->send(new OtpMail($code));
+            } catch (\Exception $e) {
+                // If email fails, we still stop login, but maybe warn them
+                throw ValidationException::withMessages([
+                    'email' => ['Account unverified. Failed to send new code. Please try again later.']
+                ]);
+            }
+
+            // D. Block Login and Tell Frontend we sent a code
+            throw ValidationException::withMessages([
+                'email' => ['Account unverified. A fresh verification code has been sent to your email.']
             ]);
         }
-        
-        // 3. Issue Token
+
+        // 3. Issue Token (Only if verified)
+        if (!method_exists($user, 'createToken')) {
+            throw ValidationException::withMessages([
+                'token' => ['User model does not support API tokens. Please ensure HasApiTokens trait is used.']
+            ]);
+        }
         return $user->createToken('auth_token')->plainTextToken;
     }
+    /**
+     * Forgot Password - Send OTP
+     */
+
 
     public function forgotPassword(array $data)
     {

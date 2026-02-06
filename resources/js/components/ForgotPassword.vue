@@ -21,17 +21,28 @@
       </div>
 
       <div v-if="step === 2">
-        <p class="text-center text-sm text-gray-600 mb-6">Enter the 6-digit code sent to <strong>{{ form.email }}</strong></p>
-        
-        <div class="flex justify-center gap-2 mb-6">
-            <input v-for="i in 6" :key="i" v-model="otpDigits[i-1]" type="text" maxlength="1" 
-                   @input="focusNext(i, $event)" 
-                   ref="otpInputs"
-                   class="w-12 h-14 text-center text-xl font-bold border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+        <div class="mb-6">
+            <OtpInput 
+                v-model="form.otp"
+                :length="6"
+                :error="error"
+                :show-error="!!error"
+                label="Check your Email"
+                help-text="We sent a 6-digit code to your email address."
+                @complete="onOtpComplete" 
+            />
         </div>
 
-        <button @click="step = 3" :disabled="otpDigits.join('').length !== 6" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50">
+        <button 
+            @click="step = 3" 
+            :disabled="form.otp.length !== 6" 
+            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition-all"
+        >
           Verify Code
+        </button>
+        
+        <button @click="step = 1" class="w-full mt-4 text-sm text-gray-500 hover:text-gray-700">
+            Wrong email? Go back
         </button>
       </div>
 
@@ -39,11 +50,11 @@
         <form @submit.prevent="handleResetPassword">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-            <input v-model="form.password" type="password" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+            <input v-model="form.password" type="password" autocomplete="new-password" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
           </div>
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-            <input v-model="form.password_confirmation" type="password" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+            <input v-model="form.password_confirmation" type="password" autocomplete="new-password" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
           </div>
           
           <button type="submit" :disabled="loading" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50">
@@ -63,12 +74,8 @@
         </router-link>
       </div>
 
-      <div v-if="error" class="mt-4 p-3 bg-red-50 text-red-600 text-sm text-center rounded border border-red-100">
+      <div v-if="error && step !== 2" class="mt-4 p-3 bg-red-50 text-red-600 text-sm text-center rounded border border-red-100">
         {{ error }}
-      </div>
-
-      <div v-if="step < 4" class="mt-6 text-center border-t pt-4">
-        <router-link to="/" class="text-sm text-blue-600 hover:underline">Back to Login</router-link>
       </div>
 
     </div>
@@ -77,39 +84,47 @@
 
 <script>
 import axios from 'axios';
+import OtpInput from './OtpInput.vue'; // Import your component
 
 export default {
+  components: {
+    OtpInput // Register it
+  },
   data() {
     return {
       step: 1,
       loading: false,
       error: '',
-      otpDigits: ['', '', '', '', '', ''],
+      // We removed 'otpDigits' array because your component handles that!
       form: {
         email: '',
-        otp: '',
+        otp: '', // This string binds directly to your component
         password: '',
         password_confirmation: ''
       }
     };
   },
   methods: {
-    // Step 1: Send Email
     async handleSendCode() {
       this.loading = true;
       this.error = '';
       try {
         await axios.post('/api/forgot-password', { email: this.form.email });
         this.step = 2;
-        this.$nextTick(() => this.$refs.otpInputs[0].focus());
       } catch (err) {
         this.error = err.response?.data?.message || 'We could not find that email address.';
       } finally {
         this.loading = false;
       }
     },
+
+    // Optional: Auto-advance when user fills all 6 digits
+    onOtpComplete(code) {
+        this.form.otp = code;
+        // You could uncomment this line to auto-click the button:
+        // this.step = 3; 
+    },
     
-    // Step 3: Final Reset
     async handleResetPassword() {
       if (this.form.password !== this.form.password_confirmation) {
         this.error = "Passwords do not match.";
@@ -118,21 +133,19 @@ export default {
 
       this.loading = true;
       this.error = '';
-      this.form.otp = this.otpDigits.join('');
 
       try {
+        // No need to join array anymore, form.otp is already a string
         await axios.post('/api/reset-password', this.form);
-        this.step = 4; // Success Screen
+        this.step = 4;
       } catch (err) {
         this.error = err.response?.data?.message || 'Invalid code or password format.';
+        // If the error is about the OTP code, move back to step 2 to show it nicely
+        if (this.error.toLowerCase().includes('code')) {
+             this.step = 2;
+        }
       } finally {
         this.loading = false;
-      }
-    },
-
-    focusNext(index, event) {
-      if (event.target.value && index < 6) {
-        this.$refs.otpInputs[index].focus();
       }
     }
   }

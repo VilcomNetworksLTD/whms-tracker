@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
-    <!-- Header -->
     <div class="mb-8">
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -33,9 +32,7 @@
         </div>
       </div>
 
-      <!-- IMPROVED Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-        <!-- Total Forms Card -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-blue-50 rounded-lg">
@@ -44,16 +41,15 @@
               </svg>
             </div>
             <div class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-              Forms
+              All Time
             </div>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 mb-1">{{ trackerForms.length }}</p>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ globalStats.total_forms }}</p>
             <p class="text-sm text-gray-500 truncate">Total Forms</p>
           </div>
         </div>
 
-        <!-- Total Amount In Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-green-50 rounded-lg">
@@ -61,17 +57,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-              +{{ stats.totalAmountIn > 0 ? formatCurrency(stats.totalAmountIn / trackerForms.length) : '0' }}
-            </div>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(stats.totalAmountIn) }}</p>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(globalStats.total_amount_in) }}</p>
             <p class="text-sm text-gray-500 truncate">Total Amount In</p>
           </div>
         </div>
 
-        <!-- Total Fees Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-orange-50 rounded-lg">
@@ -79,17 +71,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
               </svg>
             </div>
-            <div class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
-              {{ stats.totalAmountIn > 0 ? ((stats.totalFees / stats.totalAmountIn) * 100).toFixed(1) + '%' : '0%' }}
-            </div>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(stats.totalFees) }}</p>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(globalStats.total_fees) }}</p>
             <p class="text-sm text-gray-500 truncate">Total Fees</p>
           </div>
         </div>
 
-        <!-- Total Amount Out Card -->
         <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="flex items-start justify-between mb-3">
             <div class="p-2 bg-blue-50 rounded-lg">
@@ -102,62 +90,13 @@
             </div>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(stats.totalAmountOut) }}</p>
+            <p class="text-2xl font-bold text-gray-900 mb-1">{{ formatCurrency(globalStats.total_amount_out) }}</p>
             <p class="text-sm text-gray-500 truncate">Total Amount Out</p>
-          </div>
-        </div>
-
-        <!-- Completed Card -->
-        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <div class="flex items-start justify-between mb-3">
-            <div class="p-2 bg-emerald-50 rounded-lg">
-              <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-              {{ trackerForms.length > 0 ? Math.round((stats.completed / trackerForms.length) * 100) : 0 }}%
-            </div>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 mb-1">{{ stats.completed }}</p>
-            <p class="text-sm text-gray-500 truncate">Completed Forms</p>
-            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-              <div 
-                class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" 
-                :style="{ width: trackerForms.length > 0 ? (stats.completed / trackerForms.length) * 100 + '%' : '0%' }"
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pending Card -->
-        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <div class="flex items-start justify-between mb-3">
-            <div class="p-2 bg-amber-50 rounded-lg">
-              <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div class="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
-              {{ trackerForms.length > 0 ? Math.round((stats.pending / trackerForms.length) * 100) : 0 }}%
-            </div>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 mb-1">{{ stats.pending }}</p>
-            <p class="text-sm text-gray-500 truncate">Pending Forms</p>
-            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-              <div 
-                class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" 
-                :style="{ width: trackerForms.length > 0 ? (stats.pending / trackerForms.length) * 100 + '%' : '0%' }"
-              ></div>
-            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Messages -->
     <div v-if="successMessage" class="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl flex items-center animate-fade-in">
       <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -182,7 +121,6 @@
       </button>
     </div>
 
-    <!-- Action Bar -->
     <div class="mb-6 bg-white rounded-xl shadow-lg p-4 border border-gray-200">
       <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
         <div class="flex items-center space-x-4">
@@ -234,7 +172,6 @@
         </button>
       </div>
 
-      <!-- Filters Panel -->
       <div v-if="showFilters" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 animate-slide-down">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
@@ -294,7 +231,6 @@
       </div>
     </div>
 
-    <!-- Loading State -->
     <div v-if="loading" class="flex justify-center items-center py-20">
       <div class="relative">
         <div class="w-16 h-16 border-4 border-blue-200 rounded-full"></div>
@@ -303,7 +239,6 @@
       </div>
     </div>
 
-    <!-- IMPROVED Table Container -->
     <div v-else class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -312,7 +247,7 @@
               <th class="px-6 py-4 text-left">
                 <input
                   type="checkbox"
-                  :checked="selectedForms.length === paginatedForms.length && paginatedForms.length > 0"
+                  :checked="selectedForms.length === trackerForms.length && trackerForms.length > 0"
                   @change="toggleSelectAll"
                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors duration-200"
                 />
@@ -329,6 +264,20 @@
                   </svg>
                 </div>
               </th>
+
+              <th 
+                class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                @click="sortTable('sales_person')"
+              >
+                <div class="flex items-center">
+                  Sales Person
+                  <svg v-if="sortField === 'sales_person'" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path v-if="sortDirection === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                    <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </th>
+
               <th 
                 class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors duration-200"
                 @click="sortTable('date')"
@@ -363,7 +312,10 @@
                 Amount Out
               </th>
               <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                Feedback
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Feedback Date
               </th>
               <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -372,7 +324,7 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr 
-              v-for="formItem in paginatedForms" 
+              v-for="formItem in trackerForms" 
               :key="formItem.id" 
               class="hover:bg-blue-50 transition-all duration-150"
               :class="{ 
@@ -401,6 +353,16 @@
                   </div>
                 </div>
               </td>
+
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center mr-3 text-xs font-bold text-gray-600">
+                    {{ formItem.sales_person ? formItem.sales_person.charAt(0).toUpperCase() : '?' }}
+                  </div>
+                  <div class="text-sm font-medium text-gray-900">{{ formItem.sales_person }}</div>
+                </div>
+              </td>
+
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <div class="flex items-center">
                   <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -430,20 +392,15 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">
                 {{ formatCurrency(formItem.amount_out) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <span :class="[
-                    'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full transition-all duration-200',
-                    formItem.feedback ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200 hover:from-green-200 hover:to-emerald-200' : 
-                    'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200 hover:from-amber-200 hover:to-orange-200'
-                  ]">
-                    {{ formItem.feedback ? 'Completed' : 'Pending' }}
-                  </span>
-                  <div v-if="formItem.feedback_date" class="ml-2 text-xs text-gray-500">
-                    {{ formatDateForDisplay(formItem.feedback_date) }}
-                  </div>
-                </div>
+              
+              <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" :title="formItem.feedback">
+                {{ formItem.feedback || '-' }}
               </td>
+              
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formItem.feedback_date ? formatDateForDisplay(formItem.feedback_date) : '-' }}
+              </td>
+
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex items-center space-x-2">
                   <button
@@ -468,7 +425,7 @@
                     v-if="!formItem.feedback"
                     @click="markAsCompleted(formItem)"
                     class="text-green-600 hover:text-green-900 p-1.5 hover:bg-green-50 rounded-lg transition-all duration-200 transform hover:scale-110"
-                    title="Mark as Completed"
+                    title="Add Feedback"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -477,8 +434,8 @@
                 </div>
               </td>
             </tr>
-            <tr v-if="filteredForms.length === 0">
-              <td colspan="9" class="px-6 py-12 text-center">
+            <tr v-if="trackerForms.length === 0">
+              <td colspan="11" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center">
                   <div class="w-16 h-16 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4 animate-pulse">
                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -500,13 +457,12 @@
         </table>
       </div>
 
-      <!-- Pagination -->
       <div v-if="totalPages > 1" class="bg-white px-6 py-4 border-t border-gray-200">
         <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
           <div class="text-sm text-gray-700">
             Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
-            <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredForms.length) }}</span> of 
-            <span class="font-medium">{{ filteredForms.length }}</span> results
+            <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, totalRecords) }}</span> of 
+            <span class="font-medium">{{ totalRecords }}</span> results
           </div>
           <div class="flex items-center space-x-2">
             <button
@@ -545,7 +501,6 @@
       </div>
     </div>
 
-    <!-- Modal for Add/Edit -->
     <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fade-in">
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
         <div class="p-6">
@@ -573,6 +528,17 @@
                   required
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   placeholder="Enter client name"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sales Person *</label>
+                <input
+                  v-model="form.sales_person"
+                  type="text"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  placeholder="Enter sales person name"
                 />
               </div>
 
@@ -656,7 +622,7 @@
               ></textarea>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-gray-100">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Feedback</label>
                 <textarea
@@ -697,7 +663,6 @@
       </div>
     </div>
 
-    <!-- Database Connection Status -->
     <div v-if="showDbStatus" class="fixed bottom-4 right-4 z-40 animate-slide-up">
       <div class="bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-w-sm">
         <div class="flex items-center justify-between mb-2">
@@ -718,7 +683,7 @@
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-gray-600">Total Records:</span>
-            <span class="text-sm font-medium text-blue-600">{{ trackerForms.length }}</span>
+            <span class="text-sm font-medium text-blue-600">{{ totalRecords }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-gray-600">Last Sync:</span>
@@ -728,29 +693,35 @@
       </div>
     </div>
 
-    <!-- Footer -->
     <div class="mt-8 text-center text-sm text-gray-500">
       <p>© {{ new Date().getFullYear() }} Web Tracker Dashboard. All rights reserved.</p>
     </div>
   </div>
 </template>
 
-<!-- The script section remains the same as your original -->
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
-import api from '../services/api';
+import { ref, onMounted } from 'vue'; // Removed 'computed', using direct server data
+import api from '../services/api'; 
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// --- STATE ---
 const trackerForms = ref([]);
 const loading = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 const showModal = ref(false);
 const isEditing = ref(false);
+
+// Pagination
 const searchQuery = ref('');
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
+const itemsPerPage = ref(25); // Set to 25
+const totalPages = ref(1);
+const totalRecords = ref(0);
+
+// Sorting & Filtering
 const sortField = ref('date');
 const sortDirection = ref('desc');
 const selectedForms = ref([]);
@@ -759,20 +730,16 @@ const filterStatus = ref('all');
 const filterPaymentMethod = ref('all');
 const filterDateFrom = ref('');
 const filterDateTo = ref('');
+
+// System
 const showDbStatus = ref(true);
 const lastSync = ref('Just now');
-
-// Database connection state
-const dbConnection = ref({
-  status: 'connected',
-  server: 'localhost:3306',
-  database: 'tracker_db',
-  version: '8.0'
-});
+const dbConnection = ref({ status: 'connected' });
 
 const form = ref({
   id: null,
   client_name: '',
+  sales_person: '',
   date: '',
   payment_method: '',
   description: '',
@@ -784,97 +751,32 @@ const form = ref({
 });
 
 const paymentMethods = ref(['Cash', 'Bank Transfer', 'Mobile Money', 'Credit Card', 'Other']);
-
-// Debounce search
 let searchTimeout = null;
 
-// Computed properties
-const filteredForms = computed(() => {
-  let filtered = [...trackerForms.value];
-  
-  // Search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(form => 
-      form.client_name.toLowerCase().includes(query) ||
-      form.description.toLowerCase().includes(query) ||
-      form.payment_method.toLowerCase().includes(query)
-    );
-  }
-  
-  // Status filter
-  if (filterStatus.value !== 'all') {
-    filtered = filtered.filter(form => 
-      filterStatus.value === 'completed' ? form.feedback : !form.feedback
-    );
-  }
-  
-  // Payment method filter
-  if (filterPaymentMethod.value !== 'all') {
-    filtered = filtered.filter(form => 
-      form.payment_method === filterPaymentMethod.value
-    );
-  }
-  
-  // Date range filter
-  if (filterDateFrom.value) {
-    const fromDate = new Date(filterDateFrom.value);
-    filtered = filtered.filter(form => new Date(form.date) >= fromDate);
-  }
-  
-  if (filterDateTo.value) {
-    const toDate = new Date(filterDateTo.value);
-    filtered = filtered.filter(form => new Date(form.date) <= toDate);
-  }
-  
-  // Sorting
-  filtered.sort((a, b) => {
-    let aValue = a[sortField.value];
-    let bValue = b[sortField.value];
-    
-    if (sortField.value.includes('date')) {
-      aValue = new Date(aValue);
-      bValue = new Date(bValue);
+// --- GLOBAL STATS (Fetched from Server) ---
+// Initialize with 0 so the UI doesn't break while loading
+const globalStats = ref({
+  total_forms: 0,
+  total_amount_in: 0,
+  total_fees: 0,
+  total_amount_out: 0
+});
+
+// --- API CALLS ---
+
+// 1. Fetch Global Stats (Summation of ALL forms in DB)
+const fetchGlobalStats = async () => {
+  try {
+    const response = await api.getStats(); 
+    if (response.data.success) {
+      globalStats.value = response.data.data;
     }
-    
-    if (sortDirection.value === 'asc') {
-      return aValue > bValue ? 1 : -1;
-    } else {
-      return aValue < bValue ? 1 : -1;
-    }
-  });
-  
-  return filtered;
-});
+  } catch (error) {
+    console.error("Failed to fetch stats:", error);
+  }
+};
 
-const paginatedForms = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return filteredForms.value.slice(start, end);
-});
-
-const totalPages = computed(() => {
-  return Math.ceil(filteredForms.value.length / itemsPerPage.value);
-});
-
-const stats = computed(() => {
-  const totalAmountIn = trackerForms.value.reduce((sum, form) => sum + (parseFloat(form.amount_in) || 0), 0);
-  const totalFees = trackerForms.value.reduce((sum, form) => sum + (parseFloat(form.fees) || 0), 0);
-  const totalAmountOut = trackerForms.value.reduce((sum, form) => sum + (parseFloat(form.amount_out) || 0), 0);
-  const completed = trackerForms.value.filter(form => form.feedback).length;
-  const pending = trackerForms.value.length - completed;
-  
-  return {
-    totalAmountIn,
-    totalFees,
-    totalAmountOut,
-    completed,
-    pending,
-    averageTransaction: trackerForms.value.length > 0 ? totalAmountIn / trackerForms.value.length : 0
-  };
-});
-
-// Fetch tracker forms
+// 2. Fetch Table Data (Paginated)
 const fetchTrackerForms = async () => {
   loading.value = true;
   errorMessage.value = '';
@@ -887,6 +789,7 @@ const fetchTrackerForms = async () => {
       sort_direction: sortDirection.value
     };
     
+    // Add filters if they exist
     if (searchQuery.value) params.search = searchQuery.value;
     if (filterStatus.value !== 'all') params.status = filterStatus.value;
     if (filterPaymentMethod.value !== 'all') params.payment_method = filterPaymentMethod.value;
@@ -894,83 +797,52 @@ const fetchTrackerForms = async () => {
     if (filterDateTo.value) params.date_to = filterDateTo.value;
     
     const response = await api.getTrackerForms(params);
+    
+    // Assign Data Directly (No client-side slicing)
     trackerForms.value = response.data.data;
 
-    
-    // Update last sync time
-    lastSync.value = new Date().toLocaleTimeString();
-    
-    // Check database connection
-    if (response.data.success) {
-      dbConnection.value.status = 'connected';
+    if (response.data.meta) {
+        totalPages.value = response.data.meta.last_page;
+        totalRecords.value = response.data.meta.total;
     }
     
+    lastSync.value = new Date().toLocaleTimeString();
+    if (response.data.success) dbConnection.value.status = 'connected';
+    
   } catch (error) {
-    errorMessage.value = 'Failed to fetch tracker forms. Please try again.' + error;
-    dbConnection.value.status = 'disconnected';
-    console.error('Error fetching tracker forms:', error);
+    errorMessage.value = 'Failed to fetch forms.';
+    console.error(error);
   } finally {
     loading.value = false;
   }
 };
 
-// Open modal for adding new form
+// --- MODAL & FORM LOGIC ---
 const openAddModal = () => {
   isEditing.value = false;
   resetForm();
   showModal.value = true;
 };
 
-// Open modal for editing
-const openEditModal = (trackerForm) => {
+const openEditModal = (item) => {
   isEditing.value = true;
-  form.value = { ...trackerForm };
-  form.value.date = formatDateForInput(trackerForm.date);
-  form.value.feedback_date = trackerForm.feedback_date ? formatDateForInput(trackerForm.feedback_date) : '';
+  form.value = { ...item };
+  form.value.date = item.date ? item.date.split('T')[0] : '';
+  form.value.feedback_date = item.feedback_date ? item.feedback_date.split('T')[0] : '';
   showModal.value = true;
 };
 
-// Format date for input field
-const formatDateForInput = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toISOString().split('T')[0];
-};
-
-// Format date for display
-const formatDateForDisplay = (dateString) => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
-
-// Format currency
-const formatCurrency = (amount) => {
-  if (!amount && amount !== 0) return '-';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'KES',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
-};
-
-// Calculate net amount
 const calculateNetAmount = () => {
   const amountIn = parseFloat(form.value.amount_in) || 0;
   const fees = parseFloat(form.value.fees) || 0;
   form.value.amount_out = (amountIn - fees).toFixed(2);
 };
 
-// Reset form
 const resetForm = () => {
   form.value = {
     id: null,
     client_name: '',
+    sales_person: '',
     date: new Date().toISOString().split('T')[0],
     payment_method: '',
     description: '',
@@ -982,125 +854,124 @@ const resetForm = () => {
   };
 };
 
-// Handle form submission
 const handleSubmit = async () => {
   errorMessage.value = '';
-  successMessage.value = '';
-  
   try {
     if (isEditing.value) {
       await api.updateTrackerForm(form.value.id, form.value);
-      successMessage.value = 'Tracker form updated successfully!';
+      successMessage.value = 'Updated successfully!';
     } else {
       await api.createTrackerForm(form.value);
-      successMessage.value = 'Tracker form created successfully!';
+      successMessage.value = 'Created successfully!';
     }
     
-    await fetchTrackerForms();
+    // Refresh BOTH lists and stats
+    await fetchTrackerForms(); 
+    await fetchGlobalStats(); 
+    
     showModal.value = false;
-    resetForm();
-    
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      successMessage.value = '';
-    }, 3000);
+    setTimeout(() => successMessage.value = '', 3000);
   } catch (error) {
-    console.log(error);
-    if (error.response && error.response.data.errors) {
-      errorMessage.value = Object.values(error.response.data.errors).flat().join(', ');
-    } else {
-      errorMessage.value = 'An error occurred. Please try again.';
-    }
+    console.error(error);
+    errorMessage.value = 'Operation failed.';
   }
 };
 
-// Delete tracker form
+// --- ACTIONS ---
 const deleteTrackerForm = async (id) => {
-  if (!confirm('Are you sure you want to delete this tracker form?')) {
-    return;
-  }
-  
+  if (!confirm('Are you sure?')) return;
   try {
     await api.deleteTrackerForm(id);
     await fetchTrackerForms();
-    successMessage.value = 'Tracker form deleted successfully!';
+    await fetchGlobalStats(); // Refresh stats
+    successMessage.value = 'Deleted successfully!';
     setTimeout(() => successMessage.value = '', 3000);
-  } catch (error) {
-    errorMessage.value = 'Failed to delete tracker form. Please try again.';
+  } catch (e) {
+    errorMessage.value = 'Delete failed.';
   }
 };
 
-// Bulk delete
 const bulkDelete = async () => {
-  if (selectedForms.value.length === 0) {
-    errorMessage.value = 'Please select at least one form to delete.';
-    return;
-  }
-  
-  if (!confirm(`Are you sure you want to delete ${selectedForms.value.length} selected forms?`)) {
-    return;
-  }
-  
+  if (!selectedForms.value.length || !confirm(`Delete ${selectedForms.value.length} items?`)) return;
   try {
     await api.bulkDeleteForms(selectedForms.value);
+    selectedForms.value = [];
     await fetchTrackerForms();
-    selectedForms.value = [];
-    successMessage.value = `${selectedForms.value.length} forms deleted successfully!`;
+    await fetchGlobalStats(); // Refresh stats
+    successMessage.value = 'Bulk delete successful!';
     setTimeout(() => successMessage.value = '', 3000);
-  } catch (error) {
-    errorMessage.value = 'Failed to delete selected forms. Please try again.';
+  } catch (e) {
+    errorMessage.value = 'Bulk delete failed.';
   }
 };
 
-// Toggle select all
-const toggleSelectAll = () => {
-  if (selectedForms.value.length === paginatedForms.value.length) {
-    selectedForms.value = [];
-  } else {
-    selectedForms.value = paginatedForms.value.map(form => form.id);
-  }
-};
+const markAsCompleted = async (item) => {
+  const feedback = prompt('Enter feedback:', item.feedback || '');
+  if (feedback === null) return;
+  if (!feedback.trim()) { errorMessage.value = 'Feedback required'; return; }
 
-// Toggle selection for a single form
-const toggleSelectForm = (id) => {
-  const index = selectedForms.value.indexOf(id);
-  if (index > -1) {
-    selectedForms.value.splice(index, 1);
-  } else {
-    selectedForms.value.push(id);
-  }
-};
-
-// Export to CSV
-const exportToCSV = async () => {
   try {
-    const params = {};
-    if (searchQuery.value) params.search = searchQuery.value;
-    if (filterStatus.value !== 'all') params.status = filterStatus.value;
-    if (filterPaymentMethod.value !== 'all') params.payment_method = filterPaymentMethod.value;
-    if (filterDateFrom.value) params.date_from = filterDateFrom.value;
-    if (filterDateTo.value) params.date_to = filterDateTo.value;
-    
-    const response = await api.exportToCSV(params);
-    
-    // Create download link
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `tracker-forms-${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    successMessage.value = 'Data exported to CSV successfully!';
+    await api.markAsCompleted(item.id, { 
+        feedback: feedback, 
+        feedback_date: new Date().toISOString().split('T')[0] 
+    });
+    await fetchTrackerForms();
+    successMessage.value = 'Marked as completed!';
     setTimeout(() => successMessage.value = '', 3000);
-  } catch (error) {
-    errorMessage.value = 'Failed to export data. Please try again.';
+  } catch (e) {
+    errorMessage.value = 'Failed to update.';
   }
 };
 
-// Sort table
+const exportToCSV = async () => {
+    const params = {
+        search: searchQuery.value,
+        status: filterStatus.value !== 'all' ? filterStatus.value : undefined,
+        payment_method: filterPaymentMethod.value !== 'all' ? filterPaymentMethod.value : undefined,
+        date_from: filterDateFrom.value,
+        date_to: filterDateTo.value
+    };
+    try {
+        const response = await api.exportToCSV(params);
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `tracker-${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        successMessage.value = 'Export successful!';
+        setTimeout(() => successMessage.value = '', 3000);
+    } catch (e) {
+        errorMessage.value = 'Export failed.';
+    }
+};
+
+const handleLogout = async () => {
+  await api.logout();
+  localStorage.removeItem('token');
+  router.push('/');
+};
+
+// --- HELPER FUNCTIONS ---
+const formatDateForDisplay = (dateStr) => {
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+const formatCurrency = (amount) => {
+  if (amount === undefined || amount === null) return '-';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KES' }).format(amount);
+};
+
+// --- PAGINATION & SORTING ---
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    fetchTrackerForms();
+  }
+};
+
 const sortTable = (field) => {
   if (sortField.value === field) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
@@ -1111,58 +982,21 @@ const sortTable = (field) => {
   fetchTrackerForms();
 };
 
-// Change page
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    fetchTrackerForms();
-  }
-};
-
-// Get pagination range
-const getPaginationRange = () => {
-  const range = [];
-  const total = totalPages.value;
-  const current = currentPage.value;
-  const delta = 2;
-  
-  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
-    range.push(i);
-  }
-  
-  if (current - delta > 2) {
-    range.unshift('...');
-  }
-  if (current + delta < total - 1) {
-    range.push('...');
-  }
-  
-  range.unshift(1);
-  if (total > 1) {
-    range.push(total);
-  }
-  
-  return range;
-};
-
-// Reset filters
 const resetFilters = () => {
+  searchQuery.value = '';
   filterStatus.value = 'all';
   filterPaymentMethod.value = 'all';
   filterDateFrom.value = '';
   filterDateTo.value = '';
-  searchQuery.value = '';
   currentPage.value = 1;
   fetchTrackerForms();
 };
 
-// Apply filters
 const applyFilters = () => {
   currentPage.value = 1;
   fetchTrackerForms();
 };
 
-// Debounced search
 const onSearch = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
@@ -1171,68 +1005,39 @@ const onSearch = () => {
   }, 500);
 };
 
-// Mark as completed
-const markAsCompleted = async (formItem) => {
-  const feedback = prompt('Enter feedback for completion:', formItem.feedback || '');
-  if (feedback === null) return; // User cancelled
-  
-  if (!feedback.trim()) {
-    errorMessage.value = 'Feedback is required to mark as completed.';
-    return;
-  }
-  
-  try {
-    const data = {
-      feedback: feedback.trim(),
-      feedback_date: new Date().toISOString().split('T')[0]
-    };
-    
-    await api.markAsCompleted(formItem.id, data);
-    await fetchTrackerForms();
-    
-    successMessage.value = 'Form marked as completed successfully!';
-    setTimeout(() => successMessage.value = '', 3000);
-  } catch (error) {
-    errorMessage.value = 'Failed to mark form as completed. Please try again.';
+const toggleSelectAll = () => {
+  if (selectedForms.value.length === trackerForms.value.length) {
+    selectedForms.value = [];
+  } else {
+    selectedForms.value = trackerForms.value.map(f => f.id);
   }
 };
 
-// Logout function
-const handleLogout = async () => {
-  try {
-    await api.logout();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    router.push('/');
-  } catch (error) {
-    console.error('Logout error:', error);
+const toggleSelectForm = (id) => {
+  const idx = selectedForms.value.indexOf(id);
+  if (idx > -1) selectedForms.value.splice(idx, 1);
+  else selectedForms.value.push(id);
+};
+
+const getPaginationRange = () => {
+  const range = [];
+  const delta = 2;
+  for (let i = Math.max(2, currentPage.value - delta); i <= Math.min(totalPages.value - 1, currentPage.value + delta); i++) {
+    range.push(i);
   }
+  if (currentPage.value - delta > 2) range.unshift('...');
+  if (currentPage.value + delta < totalPages.value - 1) range.push('...');
+  range.unshift(1);
+  if (totalPages.value > 1) range.push(totalPages.value);
+  return range;
 };
 
-// Auto-refresh data every 30 seconds
-const startAutoRefresh = () => {
-  setInterval(() => {
-    if (!showModal.value) {
-      fetchTrackerForms();
-    }
-  }, 30000);
-};
-
-// Initialize on mount
+// Initialization
 onMounted(() => {
   fetchTrackerForms();
-  
-  // Set today's date as default for new forms
-  const today = new Date().toISOString().split('T')[0];
-  form.value.date = today;
-  
-  // Start auto-refresh
-  startAutoRefresh();
-  
-  // Hide db status after 10 seconds
-  setTimeout(() => {
-    showDbStatus.value = false;
-  }, 10000);
+  fetchGlobalStats(); // Fetch totals
+  setInterval(() => { if (!showModal.value) { fetchTrackerForms(); fetchGlobalStats(); } }, 30000);
+  setTimeout(() => showDbStatus.value = false, 10000);
 });
 </script>
 

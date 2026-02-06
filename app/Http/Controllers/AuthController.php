@@ -20,10 +20,14 @@ class AuthController extends Controller
         Log::info('Register payload:', $request->all());
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required|string|min:8|confirmed',
-            ]);
+        'name' => 'required|string|max:255',
+        // Add 'ends_with:@vilcom.co.ke' here
+        'email' => 'required|string|email|max:255|unique:users|ends_with:@vilcom.co.ke',
+        'password' => 'required|string|min:8|confirmed',
+          ], [
+        // Custom error message (Optional but friendly)
+        'email.ends_with' => 'Registration is restricted to Vilcom employees (@vilcom.co.ke).'
+          ]);
 
             $user = $this->authService->register($validated);
 
