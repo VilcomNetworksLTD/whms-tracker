@@ -23,41 +23,52 @@ class SendTrackerReport extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
-    {
-        $this->info('Gathering data for the current month...');
+  public function handle()
+{
+    $this->info('Generating monthly cumulative report...');
 
-        // 1. Get Data for Current Month
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+    // 1. Set Timezone to Nairobi (Important for accurate "Start of Month")
+    $timezone = 'Africa/Nairobi';
+    
+    // 2. Define Range: From 1st of THIS month -> NOW
+    $startOfMonth = \Carbon\Carbon::now($timezone)->startOfMonth();
+    $endOfMonth   = \Carbon\Carbon::now($timezone)->endOfMonth();
 
-        $forms = TrackerForm::whereBetween('date', [$startOfMonth, $endOfMonth])
-                            ->orderBy('date', 'desc')
-                            ->orderBy('created_at', 'desc')
-                            ->limit(50) // Limit to avoid email size limits
-                            ->get();
+    // 3. Fetch Data (Cumulative for the whole month)
+    // We removed 'limit(50)' so you get the FULL report.
+    $forms = \App\Models\TrackerForm::whereBetween('date', [$startOfMonth, $endOfMonth])
+                                    ->orderBy('date', 'desc')
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
 
-        // 2. Calculate Stats
-        $stats = [
-            'count' => $forms->count(),
-            'amount_in' => $forms->sum('amount_in'),
-            'completed' => $forms->whereNotNull('feedback')->count(),
-        ];
-
-        // 3. Define Recipients (Comma separated list)
-        // You can also move this to .env file: RECIPIENT_EMAILS="admin@vilcom.co.ke,manager@vilcom.co.ke"
-        $recipients = ['admin@vilcom.co.ke', 'caleb.kipchirchi@vilcom.co.ke']; 
-
-        // 4. Send Email
-        foreach ($recipients as $email) {
-            $this->info("Sending to $email...");
-            try {
-                Mail::to($email)->send(new DailyTrackerReport($forms, $stats));
-            } catch (\Exception $e) {
-                $this->error("Failed to send to $email: " . $e->getMessage());
-            }
-        }
-
-        $this->info('Reports sent successfully!');
+    if ($forms->isEmpty()) {
+        $this->info('No forms found for this month ('.$startOfMonth->format('M Y').'). Skipping email.');
+        return;
     }
+
+    // 4. Calculate Cumulative Stats for the Month
+    $stats = [
+        'count'      => $forms->count(),
+        'amount_in'  => $forms->sum('amount_in'),
+        'fees'       => $forms->sum('fees'),
+        'amount_out' => $forms->sum('amount_out'),
+    ];
+
+    // 5. Define Recipients
+    $recipients = ['caleb.kipchirchi@vilcom.co.ke']; 
+
+    // 6. Send Email
+    foreach ($recipients as $email) {
+        $this->info("Sending report to $email...");
+        try {
+            \Illuminate\Support\Facades\Mail::to($email)
+                ->send(new \App\Mail\DailyTrackerReport($forms, $stats));
+            $this->info("✔ Sent successfully to $email");
+        } catch (\Exception $e) {
+            $this->error("✘ Failed to send to $email: " . $e->getMessage());
+        }
+    }
+
+    $this->info('All operations completed.');
+}
 }
