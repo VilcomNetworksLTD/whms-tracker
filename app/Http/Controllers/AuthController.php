@@ -21,7 +21,7 @@ class AuthController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
+                'email' => 'required|email|unique:users,email|ends_with:@vilcom.co.ke',
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
