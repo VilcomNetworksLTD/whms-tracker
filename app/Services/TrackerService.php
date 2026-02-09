@@ -184,8 +184,8 @@ class TrackerService
             });
         }
         
-        if ($request->has('date_from')) $query->whereDate('date', '>=', $request->date_from);
-        if ($request->has('date_to')) $query->whereDate('date', '<=', $request->date_to);
+        if ($request->filled('date_from')) $query->whereDate('date', '>=', $request->date_from);
+        if ($request->filled('date_to')) $query->whereDate('date', '<=', $request->date_to);
 
         $forms = $query->orderBy('date', 'desc')->get();
 
