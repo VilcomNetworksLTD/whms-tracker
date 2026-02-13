@@ -1,16 +1,17 @@
 import axios from 'axios';
 
-// Create axios instance
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8000/api',
+    // baseURL: 'http://localhost:8001/api',
+    baseURL:'https://webtracker.vilcom-net.co.ke/api',
     withCredentials: true, 
     headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
     }
 });
 
-// Add token interceptor
+// Token interceptor
 apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -24,29 +25,23 @@ apiClient.interceptors.request.use(
     }
 );
 
-
-apiClient.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Add response interceptor for error handling
+// Response interceptor for error handling
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
+        // Handle 401 Unauthorized errors
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/';
+            // Don't redirect if we're already on the login page
+            if (!window.location.pathname.includes('/')) {
+                window.location.href = '/';
+            }
         }
         return Promise.reject(error);
     }
 );
 
-// Create and export API methods
 const api = {
     // Auth methods
     login(credentials) {
@@ -72,6 +67,24 @@ const api = {
     setToken(token) {
         localStorage.setItem('token', token);
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    },
+    
+    // Helper method to get current user
+    getCurrentUser() {
+        try {
+            const userStr = localStorage.getItem('user');
+            return userStr ? JSON.parse(userStr) : null;
+        } catch (e) {
+            console.error('Failed to parse user data:', e);
+            return null;
+        }
+    },
+    
+    // Check if user is authenticated
+    isAuthenticated() {
+        const token = localStorage.getItem('token');
+        const user = this.getCurrentUser();
+        return !!(token && user && user.id);
     },
     
     // Tracker Forms methods
@@ -111,10 +124,8 @@ const api = {
     },
     
     getStats() {
-       
         return apiClient.get('/tracker-forms/stats'); 
     },
 };
 
-// Export the API object
 export default api;

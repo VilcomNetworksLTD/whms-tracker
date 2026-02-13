@@ -42,3 +42,9 @@ Route::get('/test', function () {
     ]);
 });
 
+// routes/web.php or routes/api.php
+Route::get('/test-tracker-email', function () {
+    App\Jobs\SendTrackerSummaryEmail::dispatch();
+    return 'Tracker summary email job dispatched!';
+});
+
